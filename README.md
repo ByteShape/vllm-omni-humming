@@ -34,34 +34,38 @@ symbol it targets:
 
 ## Install
 
-Into the same venv that runs `vllm-omni serve`. Shown for CUDA 12.9 wheels; adapt the
-wheel URLs for your platform.
+Shown for CUDA 12.9 wheels; adapt the wheel URLs for your platform.
 
 ```bash
-python -m venv venv && source venv/bin/activate
-pip install -U pip
+# 1) conda env (skip the first two lines if you already have conda)
+curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+bash Miniforge3-Linux-x86_64.sh -b -p ~/miniforge3 && source ~/miniforge3/bin/activate
+conda create -y -n qwen-image-humming python=3.12
+conda activate qwen-image-humming
 
-# 1) torch trio (cu129)
+# 2) torch trio (cu129)
 pip install torch==2.11.0 torchvision==0.26.0 torchaudio==2.11.0 \
   --index-url https://download.pytorch.org/whl/cu129
 
-# 2) vLLM 0.24.0 cu129 wheel
+# 3) vLLM 0.24.0 cu129 wheel
 printf 'torch==2.11.0+cu129\ntorchvision==0.26.0+cu129\ntorchaudio==2.11.0+cu129\n' > constraints.txt
 PIP_CONSTRAINT=constraints.txt pip install \
   https://github.com/vllm-project/vllm/releases/download/v0.24.0/vllm-0.24.0+cu129-cp38-abi3-manylinux_2_28_x86_64.whl
 
-# 3) vLLM-Omni 0.24.0
+# 4) vLLM-Omni 0.24.0
 PIP_CONSTRAINT=constraints.txt pip install vllm-omni==0.24.0
 
-# 4) this plugin
+# 5) this plugin
 PIP_CONSTRAINT=constraints.txt pip install vllm-omni-humming==0.2.0
 
-# 5) humming kernels (required)
+# 6) humming kernels (required)
 pip install --no-deps "humming-kernels>=0.1.11"
 ```
 
-Requirements: NVIDIA GPU (SM75+), driver ≥ 575. No CUDA toolkit needed — kernels are
-JIT-compiled on first serve (a few minutes once, cached afterwards).
+Requirements: NVIDIA GPU (SM75+), driver ≥ 575, gcc. No CUDA toolkit needed — kernels
+are JIT-compiled on first serve (a few minutes once, cached afterwards). Any Python
+3.10–3.13 environment works in place of conda (a system venv additionally needs the
+`python3-venv` and `python3-dev` packages).
 
 ## Serve
 
