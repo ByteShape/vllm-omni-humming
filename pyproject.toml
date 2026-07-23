@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vllm-omni-humming"
+version = "0.2.0"
+description = "Companion plugin: load & serve pre-quantized humming Qwen-Image DiT pipelines on stock vLLM-Omni"
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "ByteShape" }]
+keywords = ["vllm", "vllm-omni", "humming", "quantization", "qwen-image", "diffusion"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+# Runtime dependency. vLLM-Omni is the host this plugin patches; pin to the 0.24.x
+# line it targets. vLLM itself (and the torch trio) are pulled in by vllm-omni /
+# the serving environment and are intentionally NOT re-pinned here.
+dependencies = [
+    "vllm-omni==0.24.*",
+]
+
+[project.optional-dependencies]
+# The real `humming` top-level module (imported by the pre-import patch) is provided
+# by the `humming-kernels` distribution. It is normally pulled in transitively by the
+# vLLM wheel, but that pin can lag; >=0.1.11 is the floor this plugin is verified
+# against (0.1.6 corrupts the Qwen-Image DiT on sm_120). Install `[kernels]` to pin
+# it explicitly, or manage humming-kernels yourself in the serving env.
+kernels = ["humming-kernels>=0.1.11"]
+
+[project.urls]
+Homepage = "https://github.com/ByteShape/vllm-omni-humming"
+Repository = "https://github.com/ByteShape/vllm-omni-humming"
+Changelog = "https://github.com/ByteShape/vllm-omni-humming/blob/main/CHANGELOG.md"
+
+[project.entry-points."vllm_omni.general_plugins"]
+# The group STOCK vLLM-Omni loads in every process (process0, engine core, workers)
+# via load_omni_general_plugins(). This is the authoritative registration path.
+vllm_omni_humming = "vllm_omni_humming:register"
+
+[project.entry-points."vllm.general_plugins"]
+# Belt-and-suspenders: vLLM core loads this group early in the main process, giving
+# the real-humming pre-import a chance to run before anything imports the omni factory
+# (and installs its stubs). register() is idempotent, so double invocation is harmless.
+vllm_omni_humming = "vllm_omni_humming:register"
+
+[tool.setuptools]
+packages = ["vllm_omni_humming"]
