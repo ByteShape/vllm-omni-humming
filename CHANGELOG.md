@@ -3,6 +3,10 @@
 All notable changes to `vllm-omni-humming`. This project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## 0.2.1
+
+Documentation-only release: conda-first install instructions. No code changes.
+
 ## 0.2.0
 
 First public release (GitHub + PyPI).

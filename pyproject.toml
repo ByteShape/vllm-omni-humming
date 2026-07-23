@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vllm-omni-humming"
-version = "0.2.0"
+version = "0.2.1"
 description = "Companion plugin: load & serve pre-quantized humming Qwen-Image DiT pipelines on stock vLLM-Omni"
 readme = "README.md"
 requires-python = ">=3.10,<3.14"

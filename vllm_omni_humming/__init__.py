@@ -31,7 +31,7 @@ import logging
 
 from . import _factory, _loader, _modpin, _preimport
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __all__ = ["register", "__version__"]
 
 logger = logging.getLogger("vllm_omni_humming")
