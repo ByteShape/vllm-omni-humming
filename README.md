@@ -14,7 +14,7 @@ Linux only, NVIDIA GPUs (tested on 30-, 40-, 50-series and RTX Pro 6000).
 
 | vllm-omni-humming | vLLM-Omni  | humming-kernels | vLLM       | Python           |
 | ----------------- | ---------- | --------------- | ---------- | ---------------- |
-| **0.2.1**   | `0.24.x` | `>=0.1.11`    | `0.24.0` | `>=3.10,<3.14` |
+| **0.3.0**   | `0.24.x` | `>=0.1.11`    | `0.24.0` | `>=3.10,<3.14` |
 
 `humming-kernels >= 0.1.11` is required (older versions produce corrupted images on
 some GPUs). Install it explicitly as shown below, or via this package's `[kernels]`
@@ -60,7 +60,7 @@ PIP_CONSTRAINT=constraints.txt pip install \
 PIP_CONSTRAINT=constraints.txt pip install vllm-omni==0.24.0
 
 # 5) this plugin
-PIP_CONSTRAINT=constraints.txt pip install vllm-omni-humming==0.2.1
+PIP_CONSTRAINT=constraints.txt pip install vllm-omni-humming==0.3.0
 
 # 6) humming kernels
 pip install --no-deps "humming-kernels>=0.1.11"

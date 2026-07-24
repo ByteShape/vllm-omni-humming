@@ -3,6 +3,16 @@
 All notable changes to `vllm-omni-humming`. This project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## 0.3.0
+
+- Fail loud on an unsupported vLLM-Omni version: when a private vLLM-Omni symbol this
+  plugin patches is missing or has changed signature, `register()` now raises
+  `UnsupportedVllmOmniError` (logged at CRITICAL) instead of silently skipping the patch
+  — a partially-patched server would load humming checkpoints incorrectly. The
+  "not imported yet" case still soft-skips. Verified against vLLM-Omni 0.24.0.
+- README: compatibility notes (Linux; NVIDIA 30-/40-/50-series + RTX Pro 6000) and a
+  keyless serve example.
+
 ## 0.2.1
 
 Documentation-only release: conda-first install instructions. No code changes.
