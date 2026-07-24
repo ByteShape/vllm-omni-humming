@@ -50,6 +50,8 @@ UPSTREAM TARGET
 """
 import logging
 
+from ._preflight import require_attr, require_params
+
 logger = logging.getLogger("vllm_omni_humming")
 
 # Suffixes upstream 0.24.0 does NOT yet allow-list (verified against the pristine
@@ -64,12 +66,14 @@ def patch_process_weights_after_loading() -> bool:
     try:
         import torch
         from vllm_omni.diffusion.model_loader import diffusers_loader as dl
-    except Exception as e:
+    except ImportError as e:
         logger.debug("vllm-omni-humming: diffusers_loader not importable yet (%s)", e)
         return False
 
     L = dl.DiffusersPipelineLoader
-    orig = L._process_weights_after_loading
+    orig = require_attr(L, "_process_weights_after_loading", "DiffusersPipelineLoader")
+    require_params(orig, ["model", "target_device"],
+                   "DiffusersPipelineLoader._process_weights_after_loading")
     if getattr(orig, "_bshumming_cuda_staged", False):
         return True
 
@@ -95,13 +99,15 @@ def patch_suffix_allowlist() -> bool:
         from vllm_omni.diffusion.model_loader.diffusers_loader import (
             DiffusersPipelineLoader as L,
         )
-    except Exception as e:
+    except ImportError as e:
         logger.debug("vllm-omni-humming: diffusers_loader not importable yet (%s)", e)
         return False
     if getattr(L, "_bshumming_suffix", False):
         return True
 
-    orig = L._is_expected_quantized_weight
+    orig = require_attr(L, "_is_expected_quantized_weight", "DiffusersPipelineLoader")
+    require_params(orig, ["name"],
+                   "DiffusersPipelineLoader._is_expected_quantized_weight")
 
     def patched(name):
         try:

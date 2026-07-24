@@ -10,6 +10,8 @@ variables, no configuration.
 
 ## Compatibility
 
+Linux only, NVIDIA GPUs (tested on 30-, 40-, 50-series and RTX Pro 6000).
+
 | vllm-omni-humming | vLLM-Omni  | humming-kernels | vLLM       | Python           |
 | ----------------- | ---------- | --------------- | ---------- | ---------------- |
 | **0.2.1**   | `0.24.x` | `>=0.1.11`    | `0.24.0` | `>=3.10,<3.14` |
@@ -34,12 +36,14 @@ symbol it targets:
 
 ## Install
 
-Shown for CUDA 12.9 wheels; adapt the wheel URLs for your platform.
+Linux only, NVIDIA GPUs (tested on 30-, 40-, 50-series and RTX Pro 6000).
 
 ```bash
-# 1) conda env (skip the first two lines if you already have conda)
+# 0) install conda (skip if you already have conda)
 curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
 bash Miniforge3-Linux-x86_64.sh -b -p ~/miniforge3 && source ~/miniforge3/bin/activate
+
+# 1) conda env
 conda create -y -n qwen-image-humming python=3.12
 conda activate qwen-image-humming
 
@@ -58,7 +62,7 @@ PIP_CONSTRAINT=constraints.txt pip install vllm-omni==0.24.0
 # 5) this plugin
 PIP_CONSTRAINT=constraints.txt pip install vllm-omni-humming==0.2.1
 
-# 6) humming kernels (required)
+# 6) humming kernels
 pip install --no-deps "humming-kernels>=0.1.11"
 ```
 
@@ -73,7 +77,7 @@ are JIT-compiled on first serve (a few minutes once, cached afterwards). Any Pyt
 vllm-omni serve /path/to/checkpoint \
   --omni --served-model-name Qwen/Qwen-Image-2512 \
   --enable-cpu-offload \
-  --port 8124 --api-key "$KEY"
+  --port 8124
 ```
 
 Keep `--enable-cpu-offload` on GPUs with ≤ 32 GiB; drop it on larger cards for full
@@ -81,8 +85,16 @@ speed. Generate an image (OpenAI images API):
 
 ```bash
 curl -s http://127.0.0.1:8124/v1/images/generations \
-  -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
-  -d '{"model":"Qwen/Qwen-Image-2512","prompt":"A red panda on a mossy log at dawn","size":"1024x1024","num_inference_steps":20,"true_cfg_scale":2.5,"negative_prompt":"blurry, low quality, distorted, watermark","seed":1234}' \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen/Qwen-Image-2512",
+    "prompt": "A red panda on a mossy log at dawn",
+    "size": "1024x1024",
+    "num_inference_steps": 20,
+    "true_cfg_scale": 2.5,
+    "negative_prompt": "blurry, low quality, distorted, watermark",
+    "seed": 1234
+  }' \
   | python3 -c "import sys,json,base64; d=json.load(sys.stdin); open('out.png','wb').write(base64.b64decode(d['data'][0]['b64_json']))"
 ```
 
