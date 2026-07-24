@@ -10,7 +10,7 @@ variables, no configuration.
 
 ## Compatibility
 
-Linux only, NVIDIA GPUs (tested on 30-, 40-, and 50-series).
+Linux only, NVIDIA GPUs (tested on 30-, 40-, 50-series and RTX Pro 6000).
 
 | vllm-omni-humming | vLLM-Omni  | humming-kernels | vLLM       | Python           |
 | ----------------- | ---------- | --------------- | ---------- | ---------------- |
@@ -36,7 +36,7 @@ symbol it targets:
 
 ## Install
 
-Linux only, NVIDIA GPUs (tested on 30-, 40-, and 50-series).
+Linux only, NVIDIA GPUs (tested on 30-, 40-, 50-series and RTX Pro 6000).
 
 ```bash
 # 0) install conda (skip if you already have conda)
@@ -77,7 +77,7 @@ are JIT-compiled on first serve (a few minutes once, cached afterwards). Any Pyt
 vllm-omni serve /path/to/checkpoint \
   --omni --served-model-name Qwen/Qwen-Image-2512 \
   --enable-cpu-offload \
-  --port 8124 --api-key "$KEY"
+  --port 8124
 ```
 
 Keep `--enable-cpu-offload` on GPUs with ≤ 32 GiB; drop it on larger cards for full
@@ -85,8 +85,16 @@ speed. Generate an image (OpenAI images API):
 
 ```bash
 curl -s http://127.0.0.1:8124/v1/images/generations \
-  -H "Authorization: Bearer $KEY" -H "Content-Type: application/json" \
-  -d '{"model":"Qwen/Qwen-Image-2512","prompt":"A red panda on a mossy log at dawn","size":"1024x1024","num_inference_steps":20,"true_cfg_scale":2.5,"negative_prompt":"blurry, low quality, distorted, watermark","seed":1234}' \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen/Qwen-Image-2512",
+    "prompt": "A red panda on a mossy log at dawn",
+    "size": "1024x1024",
+    "num_inference_steps": 20,
+    "true_cfg_scale": 2.5,
+    "negative_prompt": "blurry, low quality, distorted, watermark",
+    "seed": 1234
+  }' \
   | python3 -c "import sys,json,base64; d=json.load(sys.stdin); open('out.png','wb').write(base64.b64decode(d['data'][0]['b64_json']))"
 ```
 
