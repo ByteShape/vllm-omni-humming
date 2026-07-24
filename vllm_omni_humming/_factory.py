@@ -28,6 +28,8 @@ UPSTREAM TARGET
 """
 import logging
 
+from ._preflight import _fail
+
 logger = logging.getLogger("vllm_omni_humming")
 
 
@@ -76,8 +78,17 @@ def register_factory_override() -> bool:
     returns True on success, False (never raises) if omni isn't importable yet."""
     try:
         from vllm_omni.quantization import factory
-    except Exception as e:
+    except ImportError as e:
         logger.debug("vllm-omni-humming: quant factory not importable yet (%s)", e)
         return False
+    # Contract: the documented `_OVERRIDES` dict, or the newer helper that writes it.
+    # If neither is present, the factory has been restructured -> fail loud.
+    has_helper = callable(getattr(factory, "register_quantization_override", None))
+    has_overrides = isinstance(getattr(factory, "_OVERRIDES", None), dict)
+    if not (has_helper or has_overrides):
+        raise _fail(
+            "vllm_omni.quantization.factory._OVERRIDES",
+            "to be a dict (or register_quantization_override() to exist)",
+        )
     _install_override(factory, "humming", build_humming)
     return True

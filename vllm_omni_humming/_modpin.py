@@ -22,6 +22,8 @@ UPSTREAM TARGET
 import inspect
 import logging
 
+from ._preflight import require_attr, require_params
+
 logger = logging.getLogger("vllm_omni_humming")
 
 
@@ -31,15 +33,18 @@ def patch_modpin() -> bool:
     False (never raises) if the qwen_image module isn't importable yet."""
     try:
         import vllm_omni.diffusion.models.qwen_image.qwen_image_transformer as M
-    except Exception as e:
+    except ImportError as e:
         logger.debug("vllm-omni-humming: qwen_image module not importable yet (%s)", e)
         return False
 
-    Block = getattr(M, "QwenImageTransformerBlock", None)
-    if Block is None:
-        return False
+    Block = require_attr(M, "QwenImageTransformerBlock", "qwen_image_transformer")
     if getattr(Block, "_bshumming_modpin", False):
         return True
+    # Contract: the block is still built from a module-level `ReplicatedLinear` we can
+    # shadow, and its ctor still takes a `quant_config` we route to the mod Linears.
+    require_attr(M, "ReplicatedLinear", "qwen_image_transformer")
+    require_params(Block.__init__, ["quant_config"],
+                   "QwenImageTransformerBlock.__init__")
 
     from vllm.model_executor.layers.quantization.humming import HummingConfig
 

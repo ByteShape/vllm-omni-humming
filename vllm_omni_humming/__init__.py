@@ -30,6 +30,7 @@ Keep this module import-light (stdlib only at top level): the heavy vllm / vllm_
 import logging
 
 from . import _factory, _loader, _modpin, _preimport
+from ._preflight import UnsupportedVllmOmniError
 
 __version__ = "0.2.1"
 __all__ = ["register", "__version__"]
@@ -60,7 +61,13 @@ def register() -> None:
     for key, step in steps:
         try:
             _STATE[key] = step()
-        except Exception:  # pragma: no cover - never crash the host process
+        except UnsupportedVllmOmniError:
+            # A private symbol we patch has moved or changed signature. Fail LOUD
+            # rather than degrade silently: applying only some patches would serve
+            # humming checkpoints incorrectly. Already logged at CRITICAL by _fail().
+            _STATE[key] = False
+            raise
+        except Exception:  # pragma: no cover - never crash the host on unrelated bugs
             logger.exception("vllm-omni-humming: %s failed", step.__name__)
             _STATE[key] = False
 
