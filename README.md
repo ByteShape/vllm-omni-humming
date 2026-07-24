@@ -10,6 +10,8 @@ variables, no configuration.
 
 ## Compatibility
 
+Linux only, NVIDIA GPUs (tested on 30-, 40-, and 50-series).
+
 | vllm-omni-humming | vLLM-Omni  | humming-kernels | vLLM       | Python           |
 | ----------------- | ---------- | --------------- | ---------- | ---------------- |
 | **0.2.1**   | `0.24.x` | `>=0.1.11`    | `0.24.0` | `>=3.10,<3.14` |
@@ -34,12 +36,14 @@ symbol it targets:
 
 ## Install
 
-Shown for CUDA 12.9 wheels; adapt the wheel URLs for your platform.
+Linux only, NVIDIA GPUs (tested on 30-, 40-, and 50-series).
 
 ```bash
-# 1) conda env (skip the first two lines if you already have conda)
+# 0) install conda (skip if you already have conda)
 curl -L -O https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
 bash Miniforge3-Linux-x86_64.sh -b -p ~/miniforge3 && source ~/miniforge3/bin/activate
+
+# 1) conda env
 conda create -y -n qwen-image-humming python=3.12
 conda activate qwen-image-humming
 
@@ -58,7 +62,7 @@ PIP_CONSTRAINT=constraints.txt pip install vllm-omni==0.24.0
 # 5) this plugin
 PIP_CONSTRAINT=constraints.txt pip install vllm-omni-humming==0.2.1
 
-# 6) humming kernels (required)
+# 6) humming kernels
 pip install --no-deps "humming-kernels>=0.1.11"
 ```
 
